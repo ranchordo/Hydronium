@@ -24,6 +24,8 @@ jobs:
         run: cat ./Hydronium/libraries.txt
       - name: Install libraries
         run: cat ./Hydronium/libraries.txt | xargs -L1 ./bin/arduino-cli lib install
-      - name: Install boards
+      - name: Update board index
         run: mv ./Hydronium/arduino-cli.yaml ./ && ./bin/arduino-cli core update-index
+      - name: Install ESP32-Firebeetle board
+        run: ./bin/arduino-cli core search esp32
       
