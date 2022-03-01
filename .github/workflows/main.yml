@@ -16,8 +16,10 @@ jobs:
       - uses: actions/checkout@v2
       - name: Setup folder structure
         run: sudo mkdir /tmp/Hydronium && sudo mv ./* /tmp/Hydronium/ && sudo mv /tmp/Hydronium ./Hydronium && sudo chmod 777 ./Hydronium
-      - name: Print out a tree as a test
-        run: sudo apt install tree && tree
+      - name: Print tree of folder structure
+        run: tree
       - name: Install Arduino CLI
         run: curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | sh
+      - name: Test Arduino CLI
+        run: ./bin/arduino-cli
       
