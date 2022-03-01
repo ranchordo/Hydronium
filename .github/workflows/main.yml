@@ -29,5 +29,5 @@ jobs:
       - name: Install ESP32 2.0.1
         run: ./bin/arduino-cli core install esp32:esp32@2.0.1
       - name: Install Firebeetle-ESP32
-        run: ./bin/arduino-cli core listall
+        run: ./bin/arduino-cli board listall
       
