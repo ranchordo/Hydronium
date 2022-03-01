@@ -28,6 +28,6 @@ jobs:
         run: mv ./Hydronium/arduino-cli.yaml ./ && ./bin/arduino-cli core update-index
       - name: Install ESP32 2.0.1
         run: ./bin/arduino-cli core install esp32:esp32@2.0.1
-      - name: Install Firebeetle-ESP32
-        run: ./bin/arduino-cli board listall
+      - name: Do compilation
+        run: ./bin/arduino-cli compile --fqbn esp32:esp32:firebeetle32 Hydronium
       
