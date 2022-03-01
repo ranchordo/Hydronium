@@ -23,5 +23,5 @@ jobs:
       - name: List libraries
         run: cat ./Hydronium/libraries.txt
       - name: Install libraries
-        run: cat ./Hydronium/libraries.txt | xargs -L1 echo
+        run: cat ./Hydronium/libraries.txt | xargs -L1 ./bin/arduino-cli lib install
       
