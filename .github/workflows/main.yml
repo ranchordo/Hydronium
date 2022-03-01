@@ -20,6 +20,10 @@ jobs:
         run: tree
       - name: Install Arduino CLI
         run: curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | sh
+      - name: List libraries to be installed
+        run: cat ./Hydronium/libraries.txt
       - name: Install libraries
-        run: cat libraries.txt | while read line ; do ./bin/arduino-cli lib install $line ; done
+        run: cat ./Hydronium/libraries.txt | xargs -L1 ./bin/arduino-cli lib install
+      - name: Install boards
+        run: mv ./Hydronium/arduino-cli.yaml ./ && ./bin/arduino-cli core update-index
       
