@@ -8,16 +8,19 @@ PersistentMemoryManager::PersistentMemoryManager(PersistentMemoryBlock* memoryBl
 void PersistentMemoryManager::setMemoryBlock(PersistentMemoryBlock* memoryBlock) {
   this->memoryBlock=memoryBlock;
 }
-boolean PersistentMemoryManager::needsAssignmentProcess() {
-  return !(this->memoryBlock->persistentMemory.persistentMemoryAssignmentInfo.assignmentDone);
-}
 void PersistentMemoryManager::resetAssignment() {
   this->index=(uint32_t)(&this->memoryBlock->persistentMemory.persistentMemoryStart);
 }
 uint32_t PersistentMemoryManager::getNextAvailableAddress() {
   return this->index;
 }
-uint32_t PersistentMemoryManager::addPersistentBlock(uint16_t len) {
+uint32_t PersistentMemoryManager::addPersistentBlock(uint32_t len) {
   this->index+=len;
+  if(this->index>((uint32_t)(((PersistentMemoryBlock*)0)+1))) {
+    //TODO: Add logger message for a persistent memory overflow
+  }
   return this->index-len;
+}
+PersistentMemoryBlock* PersistentMemoryManager::getMemoryBlock() {
+  return this->memoryBlock;
 }
