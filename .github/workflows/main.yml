@@ -24,6 +24,10 @@ jobs:
         run: cat ./Hydronium/libraries.txt
       - name: Install libraries
         run: cat ./Hydronium/libraries.txt | xargs -L1 ./bin/arduino-cli lib install
-      - name: Install boards
+      - name: Update board index
         run: mv ./Hydronium/arduino-cli.yaml ./ && ./bin/arduino-cli core update-index
+      - name: Install ESP32 2.0.1
+        run: ./bin/arduino-cli core install esp32:esp32@2.0.1
+      - name: Do compilation
+        run: ./bin/arduino-cli compile --fqbn esp32:esp32:firebeetle32 Hydronium
       
