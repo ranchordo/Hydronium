@@ -23,5 +23,5 @@ jobs:
       - name: List libraries
         run: cat ./Hydronium/libraries.txt
       - name: Install libraries
-        run: cat ./Hydronium/libraries.txt | while read line ; do echo $line ; done
+        run: while read line ; do echo $line ; done < <(cat ./Hydronium/libraries.txt)
       
