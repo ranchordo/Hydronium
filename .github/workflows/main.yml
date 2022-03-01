@@ -1,0 +1,25 @@
+name: Arduino CI with Arduino CLI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup folder structure
+        run: sudo mkdir /tmp/Hydronium && sudo mv ./* /tmp/Hydronium/ && sudo mv /tmp/Hydronium ./Hydronium && sudo chmod 777 ./Hydronium
+      - name: Print tree of folder structure
+        run: tree
+      - name: Install Arduino CLI
+        run: curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | sh
+      - name: Install libraries
+        run: cat libraries.txt | while read line ; do ./bin/arduino-cli lib install $line ; done
+      
