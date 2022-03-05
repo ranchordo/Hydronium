@@ -20,4 +20,9 @@ class SubsystemBase : public SubsystemEntry {
   protected:
   P* persistentData;
 };
+
+template<typename P>
+inline void SubsystemBase<P>::setPersistentDataStore(P* persistentData) {
+  this->persistentData=persistentData;
+}
 #endif

@@ -1,29 +1,30 @@
-#ifndef PERSISTENT_MEMORY_MANAGER
-#define PERSISTENT_MEMORY_MANAGER
+#ifndef PERSISTENTMEMORYMANAGER_IMPL
+#define PERSISTENTMEMORYMANAGER_IMPL
+#include "PersistentMemoryManager_defs.h"
 
-#include "Arduino.h"
+RTC_DATA_ATTR union PersistentMemoryBlock persistentMemoryBlock;
 
-#define RTC_SRAM_SIZE 0x1DF0ul
-union PersistentMemoryBlock {
-  //Define a blank "trivial" constructor to override default nested copy one (which would throw an error)
-  PersistentMemoryBlock() {};
-  
-  struct PersistentMemory {
-    uint8_t persistentMemoryStart=0; //MUST BE LAST in PersistentMemory struct.
-  } persistentMemory;
-  char padding[RTC_SRAM_SIZE];
-};
-extern union PersistentMemoryBlock persistentMemoryBlock;
-class PersistentMemoryManager {
-  public:
-  PersistentMemoryManager(PersistentMemoryBlock* memoryBlock);
-  void resetAssignment();
-  uint32_t addPersistentBlock(uint32_t len);
-  uint32_t getNextAvailableAddress();
-  void setMemoryBlock(PersistentMemoryBlock* memoryBlock);
-  PersistentMemoryBlock* getMemoryBlock();
-  private:
-  PersistentMemoryBlock* memoryBlock;
-  uint32_t index=0;
-};
+inline PersistentMemoryManager::PersistentMemoryManager(PersistentMemoryBlock* memoryBlock) {
+  this->setMemoryBlock(memoryBlock);
+  this->resetAssignment();
+}
+inline void PersistentMemoryManager::setMemoryBlock(PersistentMemoryBlock* memoryBlock) {
+  this->memoryBlock=memoryBlock;
+}
+inline void PersistentMemoryManager::resetAssignment() {
+  this->index=(uint32_t)(&this->memoryBlock->persistentMemory.persistentMemoryStart);
+}
+inline uint32_t PersistentMemoryManager::getNextAvailableAddress() {
+  return this->index;
+}
+inline uint32_t PersistentMemoryManager::addPersistentBlock(uint32_t len) {
+  this->index+=len;
+  if(this->index>((uint32_t)(((PersistentMemoryBlock*)0)+1))) {
+    //TODO: Add logger message for a persistent memory overflow
+  }
+  return this->index-len;
+}
+inline PersistentMemoryBlock* PersistentMemoryManager::getMemoryBlock() {
+  return this->memoryBlock;
+}
 #endif

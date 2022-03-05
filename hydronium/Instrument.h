@@ -1,36 +1,79 @@
-#ifndef INSTRUMENT
-#define INSTRUMENT
+#ifndef INSTRUMENT_IMPL
+#define INSTRUMENT_IMPL
 
-#include "Arduino.h"
-#include "PersistentMemoryManager.h"
-#include "Subsystems.h"
+#include "Instrument_defs.h"
+//Inline function declarations to dodge linker errors
 
-struct InstrumentPersistentData {
-  uint64_t nextTime=0;
-  uint16_t subsystemID=0;
-  bool notDoneFlag=false;
-};
 
-template<int numSubsystems=0>
-class Instrument {
-  public:
-  Instrument(PersistentMemoryBlock* memoryBlock);
-  void process();
-  void initialize();
-  
-  private:
-  PersistentMemoryManager memoryManager;
-  uint16_t index=0;
-  SubsystemEntry* subsystems[numSubsystems];
-  InstrumentPersistentData* persistentData;
-  void getNextTimeToPersistentStruct();
-  void setSecondLevelAlarm(uint64_t time); //time is in milliseconds since epoch
-  void setAlarmMilliseconds(uint16_t ms);
-  void deep_sleep_start();
+template<uint16_t numSubsystems>
+template<typename P>
+inline void Instrument<numSubsystems>::addSubsystem(SubsystemBase<P>* subsystem) {
+  if(index<numSubsystems) {
+    //Intiailize persistent data store for this subsystem
+    P* zeropointer=0;
+    zeropointer++;
+    P* persistentPointer=(P*)(this->memoryManager.addPersistentBlock((uint32_t)zeropointer));
+    subsystem->setPersistentDataStore(persistentPointer);
+    subsystem->onPersistentPointerSet();
 
-  protected:
-  virtual void addAllSubsystems()=0;
-  template<typename P>
-  void addSubsystem(SubsystemBase<P>* subsystem);
-};
+    //Add to subsystems list
+    this->subsystems[this->index]=subsystem;
+    this->index++;
+  } else {
+    //TODO: Add logger error message. We've initialized too many subsystems.
+  }
+}
+template<uint16_t numSubsystems>
+inline Instrument<numSubsystems>::Instrument(PersistentMemoryBlock* memoryBlock) : memoryManager(memoryBlock) {
+  this->persistentData=0;
+  this->persistentData=(InstrumentPersistentData*)memoryManager.addPersistentBlock((uint32_t)(this->persistentData+1));
+}
+template<uint16_t numSubsystems>
+inline void Instrument<numSubsystems>::initialize() {
+  this->addAllSubsystems();
+}
+template<uint16_t numSubsystems>
+inline void Instrument<numSubsystems>::getNextTimeToPersistentStruct() {
+  persistentData->nextTime=~((uint64_t)(0)); //Largest possible value
+  for(int i=0;i<min(this->index,numSubsystems);i++) {
+    uint64_t nextTime=this->subsystems[i]->getNextTime();
+    if(nextTime < this->persistentData->nextTime) {
+      this->persistentData->nextTime=nextTime;
+      this->persistentData->subsystemID=i;
+    }
+  }
+}
+template<uint16_t numSubsystems>
+inline void Instrument<numSubsystems>::process() {
+  if(this->persistentData->notDoneFlag) {
+    this->persistentData->notDoneFlag=false;
+    this->setAlarmMilliseconds(this->persistentData->nextTime % ((uint64_t)1000));
+    this->deep_sleep_start();
+  } else {
+    this->subsystems[this->persistentData->subsystemID]->execute();
+    this->getNextTimeToPersistentStruct();
+    if((this->persistentData->nextTime % ((uint64_t)1000))>5) { //If we're not within x milliseconds of the actual alarm
+      this->persistentData->notDoneFlag=true;
+    }
+    this->setSecondLevelAlarm(this->persistentData->nextTime);
+    this->deep_sleep_start();
+  }
+  //If we get here.... I don't even know anymore
+  //TODO: Add logger message for insanity
+}
+
+template<uint16_t numSubsystems>
+inline void Instrument<numSubsystems>::deep_sleep_start() {
+  esp_deep_sleep_start();
+}
+
+template<uint16_t numSubsystems>
+inline void Instrument<numSubsystems>::setSecondLevelAlarm(uint64_t time) {
+  esp_sleep_enable_ext0_wakeup(GPIO_NUM_0, 0);
+  //TODO: Fix
+}
+template<uint16_t numSubsystems>
+inline void Instrument<numSubsystems>::setAlarmMilliseconds(uint16_t ms) {
+   esp_sleep_enable_timer_wakeup(ms*1000);
+}
 #endif
