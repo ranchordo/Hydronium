@@ -1,10 +1,12 @@
-#include "hydronium/Subsystems.h"
-#include "hydronium/ExampleSubsystem.h"
 #include "hydronium/ExampleInstrument.h"
+#include "hydronium/Instrument.h"
+#include "hydronium/PersistentMemoryManager.h"
+
+ExampleInstrument m(&persistentMemoryBlock, 453456, 183274);
 void setup() {
-  
+  //Do nothing
 }
 
 void loop() {
-  //Do nothing (we should never get to this point)
+  m.process();
 }

@@ -1,16 +1,17 @@
 #ifndef EXAMPLEINSTRUMENT
 #define EXAMPLEINSTRUMENT
-#include "Subsystems.h"
+#include "Instrument.h"
+#include "ExampleSubsystem.h"
 #include "PersistentMemoryManager.h"
 
 class ExampleInstrument : public Instrument<2> { //2 subsystems, that's why <2>.
   public:
   ExampleSubsystem exampleSubsystem1;
   ExampleSubsystem exampleSubsystem2;
-  ExampleInstrument(): //Weird syntax, but it's a member initializer
-    Instrument(&persistentMemoryBlock),
-    exampleSubsystem1(2112),
-    exampleSubsystem2(1221) {}
+  ExampleInstrument(PersistentMemoryBlock* memoryBlock, int param1, int param2): //Weird syntax, but it's a member initializer
+    Instrument(memoryBlock),
+    exampleSubsystem1(param1),
+    exampleSubsystem2(param2) {}
   void addAllSubsystems() override {
     this->addSubsystem(&exampleSubsystem1);
     this->addSubsystem(&exampleSubsystem2);
