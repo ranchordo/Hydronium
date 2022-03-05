@@ -1,8 +1,8 @@
 #ifndef EXAMPLEINSTRUMENT
 #define EXAMPLEINSTRUMENT
-#include "Instrument.h"
+#include "hydronium/Instrument.h"
 #include "ExampleSubsystem.h"
-#include "PersistentMemoryManager.h"
+#include "hydronium/PersistentMemoryManager.h"
 
 class ExampleInstrument : public Instrument<2> { //2 subsystems, that's why <2>.
   public:

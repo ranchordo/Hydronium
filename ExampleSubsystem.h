@@ -1,7 +1,7 @@
 #ifndef EXAMPLESUBSYSTEM
 #define EXAMPLESUBSYSTEM
 
-#include "Subsystems.h"
+#include "hydronium/Subsystems.h"
 #include "Arduino.h"
 
 struct ExampleSubsystemPersistentData {

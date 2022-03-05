@@ -1,5 +1,4 @@
-#include "hydronium/ExampleInstrument.h"
-#include "hydronium/Instrument.h"
+#include "ExampleInstrument.h"
 #include "hydronium/PersistentMemoryManager.h"
 
 ExampleInstrument m(&persistentMemoryBlock, 453456, 183274);
