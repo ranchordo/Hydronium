@@ -4,7 +4,11 @@
 #include "hydronium/Subsystems.h"
 #include "Arduino.h"
 
-struct ExampleSubsystemPersistentData {
+struct ExampleSubsystemConfiguration {
+  int test;
+};
+
+struct ExampleSubsystemPersistentData : public SubsystemPersistentData<ExampleSubsystemConfiguration> {
   int somePersistentParameter=0;
 };
 class ExampleSubsystem : public SubsystemBase<ExampleSubsystemPersistentData> {

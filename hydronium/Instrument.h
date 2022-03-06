@@ -8,6 +8,9 @@
 template<uint16_t numSubsystems>
 template<typename P>
 inline void Instrument<numSubsystems>::addSubsystem(SubsystemBase<P>* subsystem) {
+  #ifdef PRINT_DEBUG_INFO
+  interface->log(0,"Adding subsystem");
+  #endif
   if(index<numSubsystems) {
     //Intiailize persistent data store for this subsystem
     P* zeropointer=0;
@@ -24,12 +27,17 @@ inline void Instrument<numSubsystems>::addSubsystem(SubsystemBase<P>* subsystem)
   }
 }
 template<uint16_t numSubsystems>
-inline Instrument<numSubsystems>::Instrument(PersistentMemoryBlock* memoryBlock) : memoryManager(memoryBlock) {
+inline Instrument<numSubsystems>::Instrument(PersistentMemoryBlock* memoryBlock, InfoInterface* interface) : memoryManager(memoryBlock) {
   this->persistentData=0;
+  this->interface=interface;
   this->persistentData=(InstrumentPersistentData*)memoryManager.addPersistentBlock((uint32_t)(this->persistentData+1));
 }
 template<uint16_t numSubsystems>
 inline void Instrument<numSubsystems>::initialize() {
+  interface->begin();
+  #ifdef PRINT_DEBUG_INFO
+  interface->log(0,"Initializing instrument..."); //Use lowercase serial here as a pointer, it's specific to this instrument
+  #endif
   this->addAllSubsystems();
 }
 template<uint16_t numSubsystems>
@@ -45,6 +53,7 @@ inline void Instrument<numSubsystems>::getNextTimeToPersistentStruct() {
 }
 template<uint16_t numSubsystems>
 inline void Instrument<numSubsystems>::process() {
+  if(!this->initialized) {this->initialize();}
   if(this->persistentData->notDoneFlag) {
     this->persistentData->notDoneFlag=false;
     this->setAlarmMilliseconds(this->persistentData->nextTime % ((uint64_t)1000));

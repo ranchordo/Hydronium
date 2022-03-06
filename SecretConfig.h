@@ -1,0 +1,7 @@
+#ifndef SECRETCONFIG
+#define SECRETCONFIG
+
+#define ENV_WIFI_SSID "WIFI SSID HERE"
+#define ENV_WIFI_PWD "WIFI PASSWORD HERE"
+
+#endif

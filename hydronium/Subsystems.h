@@ -9,6 +9,11 @@ class SubsystemEntry {
   virtual uint64_t getNextTime()=0;
 };
 
+template<typename C>
+struct SubsystemPersistentData {
+  C configurationData;
+};
+
 template<typename P>
 class SubsystemBase : public SubsystemEntry {
   public:
