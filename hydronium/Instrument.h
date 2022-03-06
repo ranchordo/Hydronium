@@ -6,10 +6,10 @@
 
 
 template<uint16_t numSubsystems>
-template<typename P>
-inline void Instrument<numSubsystems>::addSubsystem(SubsystemBase<P>* subsystem) {
+template<typename P, const String* reflectionData>
+inline void Instrument<numSubsystems>::addSubsystem(SubsystemBase<P, reflectionData>* subsystem) {
   #ifdef PRINT_DEBUG_INFO
-  interface->log(0,"Adding subsystem");
+  interface->log(0,"Adding subsystem \""+subsystem->getName()+"\"");
   #endif
   if(index<numSubsystems) {
     //Intiailize persistent data store for this subsystem
@@ -27,7 +27,7 @@ inline void Instrument<numSubsystems>::addSubsystem(SubsystemBase<P>* subsystem)
   }
 }
 template<uint16_t numSubsystems>
-inline Instrument<numSubsystems>::Instrument(PersistentMemoryBlock* memoryBlock, InfoInterface* interface) : memoryManager(memoryBlock) {
+inline Instrument<numSubsystems>::Instrument(PersistentMemoryBlock* memoryBlock, InfoInterface* interface) : memoryManager(memoryBlock), configInterface(interface, subsystems, numSubsystems) {
   this->persistentData=0;
   this->interface=interface;
   this->persistentData=(InstrumentPersistentData*)memoryManager.addPersistentBlock((uint32_t)(this->persistentData+1));

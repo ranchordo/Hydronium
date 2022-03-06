@@ -23,7 +23,7 @@ class InfoInterface {
             rtc->refresh();
             timestamp="	"+String(rtc->month())+"-"+String(rtc->day())+"-"+String(rtc->year())+"	"+String(rtc->hour())+":"+String(rtc->minute())+":"+String(rtc->second())+"	";
         }
-        this->println(timestamp+prefixes[level]+msg+String(this->isRTCEnabled()));
+        this->println(timestamp+prefixes[level]+msg);
     }
     bool isRTCEnabled() {return RTCEnabled;}
     bool isBegun() {return begun;}
