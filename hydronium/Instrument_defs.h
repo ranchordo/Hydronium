@@ -6,6 +6,7 @@
 #include "Subsystems.h"
 #include "Interfaces.h"
 #include "ConfigurationInterface.h"
+#include "uRTCLib.h"
 
 struct InstrumentPersistentData {
   uint64_t nextTime=0;
@@ -16,7 +17,7 @@ struct InstrumentPersistentData {
 template<uint16_t numSubsystems=0>
 class Instrument {
   public:
-  Instrument(PersistentMemoryBlock* memoryBlock, InfoInterface* interface);
+  Instrument(PersistentMemoryBlock* memoryBlock, InfoInterface* interface, uRTCLib* rtc);
   void process();
   void initialize();
   ConfigurationInterface* getConfigurationInterface() {return &configInterface;}
@@ -35,6 +36,7 @@ class Instrument {
 
   protected:
   InfoInterface* interface;
+  uRTCLib* rtc;
   virtual void addAllSubsystems()=0;
   template<typename P, const String* reflectionData> void addSubsystem(SubsystemBase<P, reflectionData>* subsystem);
 };

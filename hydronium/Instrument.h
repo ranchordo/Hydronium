@@ -16,6 +16,8 @@ inline void Instrument<numSubsystems>::addSubsystem(SubsystemBase<P, reflectionD
     P* zeropointer=0;
     zeropointer++;
     P* persistentPointer=(P*)(this->memoryManager.addPersistentBlock((uint32_t)zeropointer));
+    P initials;
+    persistentPointer[0]=initials;
     subsystem->setPersistentDataStore(persistentPointer);
     subsystem->onPersistentPointerSet();
 
@@ -27,10 +29,11 @@ inline void Instrument<numSubsystems>::addSubsystem(SubsystemBase<P, reflectionD
   }
 }
 template<uint16_t numSubsystems>
-inline Instrument<numSubsystems>::Instrument(PersistentMemoryBlock* memoryBlock, InfoInterface* interface) : memoryManager(memoryBlock), configInterface(interface, subsystems, numSubsystems) {
+inline Instrument<numSubsystems>::Instrument(PersistentMemoryBlock* memoryBlock, InfoInterface* interface, uRTCLib* rtc) : memoryManager(memoryBlock), configInterface(interface, subsystems, numSubsystems) {
   this->persistentData=0;
   this->interface=interface;
   this->persistentData=(InstrumentPersistentData*)memoryManager.addPersistentBlock((uint32_t)(this->persistentData+1));
+  this->rtc=rtc;
 }
 template<uint16_t numSubsystems>
 inline void Instrument<numSubsystems>::initialize() {
@@ -44,7 +47,7 @@ template<uint16_t numSubsystems>
 inline void Instrument<numSubsystems>::getNextTimeToPersistentStruct() {
   persistentData->nextTime=~((uint64_t)(0)); //Largest possible value
   for(int i=0;i<min(this->index,numSubsystems);i++) {
-    uint64_t nextTime=this->subsystems[i]->getNextTime();
+    uint64_t nextTime=this->subsystems[i]->getNextTime(this->rtc);
     if(nextTime < this->persistentData->nextTime) {
       this->persistentData->nextTime=nextTime;
       this->persistentData->subsystemID=i;

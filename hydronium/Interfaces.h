@@ -2,6 +2,8 @@
 #define OUTPUTS
 
 #define MAX_INTERFACES_IN_COLLECTION 0x10
+#define PRINTLN(x) println(String(x))
+#define PRINT(x) print(String(x))
 
 #include "Arduino.h"
 #include "uRTCLib.h"
@@ -17,6 +19,7 @@ class InfoInterface {
     virtual void write(char* s) {}
     virtual unsigned int available() {return 0;}
     virtual void readBytes(char* buffer, unsigned int length) {}
+    virtual String readString() {return "";}
     void log(uint8_t level, String msg) {
         String timestamp="	UNKNOWN	UNKNOWN	";
         if(this->RTCEnabled) {
@@ -63,6 +66,7 @@ class SerialInterface : public InfoInterface {
     void write(char* s) override {this->serial->write(s);}
     unsigned int available() override {return this->serial->available();}
     void readBytes(char* buffer, unsigned int length) override {this->serial->readBytes(buffer,length);}
+    String readString() override {return this->serial->readString();}
     private:
     HardwareSerial* serial;
     unsigned long baud=9600;

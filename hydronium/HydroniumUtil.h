@@ -104,47 +104,74 @@ inline bool HydroniumUtil::setRTCWithNTP(InfoInterface* interface, uRTCLib *rtc)
 
 #include "Regexp.h"
 
-#define CONFIG_REGEXP "CONFIG%(%s*([^,]+)%s*,%s*([^,]+)%s*%)"
+#define CONFIG_REGEXP "(%u*)%(%s*([^,]+)%s*,%s*([^,]+)%s*%)"
 #define MAX_INFO_LEN 32
 #define MAXCAPTURES 4
 
 #define MAX_CONFIG_PARAMETERS 64
 
-#define EXTRACT_STRUCT(name) ReflectableStructExtractor::extractStructInformation( name ## ReflectionData );
-
-struct ConfigurationField {
+struct ReflectedStructureField {
     String type;
     String name;
+    bool config;
+    uint32_t offset;
 };
 
 class ReflectableStructExtractor {
     public:
     static void structExtractionRegexMatchCallback(const char* match, const unsigned int length, const MatchState& ms);
     static char regexpCaptureBuffer[MAX_INFO_LEN];
-    static void extractStructInformation(const String reflectionData);
-    static ConfigurationField* getResults() {return results;}
-    static uint8_t getNumResults() {return numResults;}
+
+    ReflectableStructExtractor() : ms() {}
+    void extractStructInformation(const String reflectionData);
+    ReflectedStructureField* getResults() {return results;}
+    uint8_t getNumResults() {return numResults;}
     private:
-    static MatchState ms;
-    static ConfigurationField results[MAX_CONFIG_PARAMETERS];
-    static uint8_t numResults;
+    static ReflectableStructExtractor* activeExtractor;
+    MatchState ms;
+    ReflectedStructureField results[MAX_CONFIG_PARAMETERS];
+    uint8_t numResults=0;
+    uint32_t offset=0;
+    static uint32_t sizeofType(String name, InfoInterface* interface);
 };
-MatchState ReflectableStructExtractor::ms;
-uint8_t ReflectableStructExtractor::numResults{0};
 char ReflectableStructExtractor::regexpCaptureBuffer[MAX_INFO_LEN];
-ConfigurationField ReflectableStructExtractor::results[MAX_CONFIG_PARAMETERS];
+ReflectableStructExtractor* ReflectableStructExtractor::activeExtractor=nullptr;
 
 inline void ReflectableStructExtractor::extractStructInformation(const String reflectionData) {
     numResults=0;
-    ms.Target(HydroniumUtil::toCStr(reflectionData));
+    offset=0;
+    activeExtractor=this;
+    ms.Target(HydroniumUtil::toCStr("; "+reflectionData));
     ms.GlobalMatch(CONFIG_REGEXP, &ReflectableStructExtractor::structExtractionRegexMatchCallback);
 }
 inline void ReflectableStructExtractor::structExtractionRegexMatchCallback(const char * match, const unsigned int length, const MatchState& ms) {
     ms.GetCapture(regexpCaptureBuffer,0);
-    results[numResults].type=String(regexpCaptureBuffer);
+    activeExtractor->results[activeExtractor->numResults].config=String(regexpCaptureBuffer).equals("CONFIG");
+
     ms.GetCapture(regexpCaptureBuffer,1);
-    results[numResults].name=String(regexpCaptureBuffer);
-    numResults++;
+    activeExtractor->results[activeExtractor->numResults].type=String(regexpCaptureBuffer);
+
+    activeExtractor->results[activeExtractor->numResults].offset=activeExtractor->offset;
+    activeExtractor->offset+=sizeofType(String(regexpCaptureBuffer),nullptr);
+
+    ms.GetCapture(regexpCaptureBuffer,2);
+    activeExtractor->results[activeExtractor->numResults].name=String(regexpCaptureBuffer);
+    activeExtractor->numResults++;
 }
+
+#define ADD_TYPE_SIZE(type) if( name.equals( #type )) {return sizeof( type );}
+inline uint32_t ReflectableStructExtractor::sizeofType(String name, InfoInterface* interface) {
+    ADD_TYPE_SIZE(int);
+    ADD_TYPE_SIZE(float);
+    ADD_TYPE_SIZE(long);
+    ADD_TYPE_SIZE(double);
+    if(interface!=nullptr) {
+        interface->log(3,"Type "+name+" not recognized.");
+    } else {
+        Serial.println("Error: Type "+name+" is not recognized.");
+    }
+    return 0;
+}
+#undef ADD_TYPE_SIZE
 
 #endif
