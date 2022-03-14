@@ -1,6 +1,8 @@
 #ifndef HYDRONIUM_UTIL
 #define HYDRONIUM_UTIL
 
+typedef uint64_t ConfigurationFunctionPtr;
+
 #include "Arduino.h"
 #include "uRTCLib.h"
 #include "esp_wifi.h"
@@ -22,6 +24,10 @@ class HydroniumUtil {
     static char *toCStr(String s);
     static bool setRTCWithNTP(InfoInterface* interface, uRTCLib *rtc);
 };
+//Used for when we have a PRValue but need to limit the address operator in scope
+template<typename T> uint64_t functionPtr(T t) {
+    return *reinterpret_cast<uint64_t*>(&t);
+}
 
 inline char *HydroniumUtil::toCStr(String s) {
     return (char *)s.c_str();
@@ -165,6 +171,7 @@ inline uint32_t ReflectableStructExtractor::sizeofType(String name, InfoInterfac
     ADD_TYPE_SIZE(float);
     ADD_TYPE_SIZE(long);
     ADD_TYPE_SIZE(double);
+    ADD_TYPE_SIZE(ConfigurationFunctionPtr);
     if(interface!=nullptr) {
         interface->log(3,"Type "+name+" not recognized.");
     } else {

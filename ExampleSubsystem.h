@@ -7,13 +7,15 @@
 
 //Everything in the persistent structure needs to be created with either CONFIG or MEMBER.
 //Do not put comments inside the struct.
+//Use ConfigurationFunctionPtr and STATICCONFIG to create a Config Callable Function (CCF)
 PSTRUCT(ExampleSubsystem,
   MEMBER(int, somePersistentParameter)=0;
   MEMBER(float, someOtherPersistentParameter)=37.48;
   CONFIG(int, configParameter)=1234;
   CONFIG(float, otherConfigParameter)=87.55;
-  CONFIGFUNC(ExampleSubsystem, someConfigCallableFunction);
+  CONFIG(ConfigurationFunctionPtr, someConfigCallableFunction);
 )
+//Add configuration callable functions as shown
 
 //If this says ExampleSubsystemPersistentDataReflectionData is not defined,
 //double-check that you're using PSTRUCT to make the struct.
@@ -22,13 +24,17 @@ class SUBSYSTEMBASE(ExampleSubsystem) {
   ExampleSubsystem(int someParameter) : SubsystemBase("Example subsystem") {
     this->someParameter=someParameter;
   }
-  static void someConfigCallableFunction();
+  void someConfigCallableFunction() {this->interface->log(0,"Config callable function!");}
   //When the pointer to the allocated persistent data store is handed to us
   void onPersistentPointerSet() override {
     this->persistentData->somePersistentParameter=someParameter;
+
+    INIT_CONFIG_FUNCS(ExampleSubsystem);
+    CREATE_CONFIG_FUNC(ExampleSubsystem, someConfigCallableFunction);
   }
   private:
   int someParameter=0;
 };
+
 
 #endif

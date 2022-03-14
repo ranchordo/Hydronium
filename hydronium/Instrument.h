@@ -19,6 +19,7 @@ inline void Instrument<numSubsystems>::addSubsystem(SubsystemBase<P, reflectionD
     P initials;
     persistentPointer[0]=initials;
     subsystem->setPersistentDataStore(persistentPointer);
+    subsystem->setInterface(this->interface);
     subsystem->onPersistentPointerSet();
 
     //Add to subsystems list

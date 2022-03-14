@@ -88,19 +88,27 @@ inline void ConfigurationInterface::process() {
                         ReflectedStructureField field=this->structExtractor.getResults()[configID];
                         //Get a pointer to the value
                         uint32_t ptr=subsystems[subsystemID]->getPersistentDataStoreOffset() + field.offset;
-                        interface->println("Selected configurable value "+field.name);
-                        interface->print("The current value is \"");
-                        if(field.type.equals("int")) {
-                            interface->print(String(*((int*)ptr)));
-                        } else if(field.type.equals("float")) {
-                            interface->print(String(*((float*)ptr)));
-                        } else if(field.type.equals("long")) {
-                            interface->print(String(*((long*)ptr)));
-                        } else if(field.type.equals("double")) {
-                            interface->print(String(*((double*)ptr)));
+                        if(field.type.equals("ConfigurationFunctionPtr")) {
+                            configID=-1;
+                            //Function pointer time!
+                            interface->println("Calling "+field.name);
+                            ConfigurationFunctionPtr intfuncptr=*((ConfigurationFunctionPtr*)ptr);
+                            subsystems[subsystemID]->getCFPM()->callFuncPtr(intfuncptr,(uint32_t)(subsystems[subsystemID]));
+                        } else {
+                            interface->println("Selected configurable value "+field.name);
+                            interface->print("The current value is \"");
+                            if(field.type.equals("int")) {
+                                interface->print(String(*((int*)ptr)));
+                            } else if(field.type.equals("float")) {
+                                interface->print(String(*((float*)ptr)));
+                            } else if(field.type.equals("long")) {
+                                interface->print(String(*((long*)ptr)));
+                            } else if(field.type.equals("double")) {
+                                interface->print(String(*((double*)ptr)));
+                            }
+                            interface->println("\"");
+                            interface->println("Enter a new value for the variable now. Type CANCEL to cancel.");
                         }
-                        interface->println("\"");
-                        interface->println("Enter a new value for the variable now. Type CANCEL to cancel.");
                     }
                 }
             } else {
