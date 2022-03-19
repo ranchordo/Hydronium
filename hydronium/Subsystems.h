@@ -4,6 +4,9 @@
 #include "PersistentMemoryManager.h"
 #include "HydroniumUtil.h"
 #include "uRTCLib.h"
+#include "Sleepable.h"
+
+#define MAX_SLEEPABLES_PER_SUBSYSTEM 16
 
 #define PSTRUCT(name,inside) struct name ## PersistentData {inside uint32_t cfpm_ptr; static const bool isValidPersistentStruct=true;}; const PROGMEM String name ## PersistentDataReflectionData= #inside ;
 #define CONFIG(type,name) type name
@@ -27,6 +30,8 @@ class SubsystemEntry {
   virtual void reflectPersistentDataStructure(ReflectableStructExtractor* extractor)=0;
   virtual uint32_t getPersistentDataStoreOffset()=0;
   virtual ConfigFuncPtrManagerGeneric* getCFPM()=0;
+  virtual void sleepSubsystem()=0;
+  virtual void wakeSubsystem()=0;
 };
 
 template<typename P, const String* reflectionData>
@@ -45,11 +50,33 @@ class SubsystemBase : public SubsystemEntry {
   void reflectPersistentDataStructure(ReflectableStructExtractor* extractor) override;
   String getName() override {return name;}
   void setInterface(InfoInterface* i) {this->interface=i;}
+  void registerSleepable(Sleepable* sleepable);
+  void sleepSubsystem() override;
+  void wakeSubsystem() override;
   protected:
   String name;
   P* persistentData;
+  Sleepable *sleepables[MAX_SLEEPABLES_PER_SUBSYSTEM];
+  uint8_t sleepableIndex=0;
   InfoInterface* interface;
 };
+template<typename P, const String* reflectionData>
+inline void SubsystemBase<P, reflectionData>::registerSleepable(Sleepable* sleepable) {
+  sleepables[sleepableIndex]=sleepable;
+  sleepableIndex++;
+}
+template<typename P, const String* reflectionData>
+inline void SubsystemBase<P, reflectionData>::sleepSubsystem() {
+  for(int i=0;i<this->sleepableIndex;i++) {
+    sleepables[i]->sleep();
+  }
+}
+template<typename P, const String* reflectionData>
+inline void SubsystemBase<P, reflectionData>::wakeSubsystem() {
+  for(int i=0;i<this->sleepableIndex;i++) {
+    sleepables[i]->wake();
+  }
+}
 template<typename P, const String* reflectionData>
 inline void SubsystemBase<P, reflectionData>::reflectPersistentDataStructure(ReflectableStructExtractor* extractor) {
   extractor->extractStructInformation(*reflectionData);

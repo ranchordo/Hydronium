@@ -42,9 +42,10 @@ template<uint16_t numSubsystems>
 inline void Instrument<numSubsystems>::initialize() {
   interface->begin();
   #ifdef PRINT_DEBUG_INFO
-  interface->log(0,"Initializing instrument..."); //Use lowercase serial here as a pointer, it's specific to this instrument
+  interface->log(0,"Initializing instrument...");
   #endif
   this->addAllSubsystems();
+  this->wakeSubsystems();
 }
 template<uint16_t numSubsystems>
 inline void Instrument<numSubsystems>::getNextTimeToPersistentStruct() {
@@ -80,6 +81,7 @@ inline void Instrument<numSubsystems>::process() {
 template<uint16_t numSubsystems>
 inline void Instrument<numSubsystems>::deep_sleep_start() {
   this->memoryManager.confirmStructuresInitialized();
+  this->sleepSubsystems();
   esp_deep_sleep_start();
 }
 
@@ -91,5 +93,19 @@ inline void Instrument<numSubsystems>::setSecondLevelAlarm(uint64_t time) {
 template<uint16_t numSubsystems>
 inline void Instrument<numSubsystems>::setAlarmMilliseconds(uint16_t ms) {
    esp_sleep_enable_timer_wakeup(ms*1000);
+}
+template<uint16_t numSubsystems>
+inline void Instrument<numSubsystems>::sleepSubsystems() {
+  for(int i=0;i<numSubsystems;i++) {
+    SubsystemEntry* entryptr=subsystems[i];
+    entryptr->sleepSubsystem();
+  }
+}
+template<uint16_t numSubsystems>
+inline void Instrument<numSubsystems>::wakeSubsystems() {
+  for(int i=0;i<numSubsystems;i++) {
+    SubsystemEntry* entryptr=subsystems[i];
+    entryptr->sleepSubsystem();
+  }
 }
 #endif

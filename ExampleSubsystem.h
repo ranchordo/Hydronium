@@ -30,7 +30,9 @@ class SUBSYSTEMBASE(ExampleSubsystem) {
   void onPersistentPointerSet() override {
     this->persistentData->somePersistentParameter=someParameter;
 
+    //Only include this if you are using CCFs:
     INIT_CONFIG_FUNCS(ExampleSubsystem);
+    //Call this for each CCF you're using:
     CREATE_CONFIG_FUNC(ExampleSubsystem, someConfigCallableFunction);
   }
   private:

@@ -7,6 +7,7 @@
 #include "Interfaces.h"
 #include "ConfigurationInterface.h"
 #include "uRTCLib.h"
+#include "Sleepable.h"
 
 struct InstrumentPersistentData {
   uint64_t nextTime=0;
@@ -30,6 +31,8 @@ class Instrument {
   void getNextTimeToPersistentStruct();
   void setSecondLevelAlarm(uint64_t time); //time is in milliseconds since epoch
   void setAlarmMilliseconds(uint16_t ms);
+  void sleepSubsystems();
+  void wakeSubsystems();
   void deep_sleep_start();
   bool initialized=false;
   ConfigurationInterface configInterface;
