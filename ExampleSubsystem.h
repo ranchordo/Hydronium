@@ -4,6 +4,7 @@
 #include "hydronium/Subsystems.h"
 #include "hydronium/HydroniumUtil.h"
 #include "Arduino.h"
+#include "Int64String.h"
 
 //Everything in the persistent structure needs to be created with either CONFIG or MEMBER.
 //Do not put comments inside the struct.
@@ -24,7 +25,7 @@ class SUBSYSTEMBASE(ExampleSubsystem) {
   ExampleSubsystem(int someParameter) : SubsystemBase("Example subsystem") {
     this->someParameter=someParameter;
   }
-  void someConfigCallableFunction() {this->interface->log(0,"Config callable function!");}
+  void someConfigCallableFunction() {this->interface->log(0,"Hi, this is our config callable function \"someConfigCallableFunction\"!");}
   //When the pointer to the allocated persistent data store is handed to us
   void onPersistentPointerSet() override {
     this->persistentData->somePersistentParameter=someParameter;

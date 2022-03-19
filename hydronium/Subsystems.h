@@ -67,7 +67,7 @@ class ConfigFuncPtrManager : public ConfigFuncPtrManagerGeneric {
 template<typename S>
 inline void ConfigFuncPtrManager<S>::callFuncPtr(ConfigurationFunctionPtr intfuncptr, uint32_t subsystemEntry) {
   S* ss=(S*)((SubsystemEntry*)subsystemEntry);
-  void(S::*funcptr)() = *reinterpret_cast<void(S::**)()>(intfuncptr);
+  void(S::*funcptr)() = *reinterpret_cast<void(S::**)()>(&intfuncptr);
   (ss->*funcptr)();
 }
 #endif

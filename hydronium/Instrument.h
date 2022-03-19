@@ -16,8 +16,10 @@ inline void Instrument<numSubsystems>::addSubsystem(SubsystemBase<P, reflectionD
     P* zeropointer=0;
     zeropointer++;
     P* persistentPointer=(P*)(this->memoryManager.addPersistentBlock((uint32_t)zeropointer));
-    P initials;
-    persistentPointer[0]=initials;
+    if(this->memoryManager.needToInitializeStructures()) {
+      P initials; //Construct an initial state
+      persistentPointer[0]=initials; //Copy constructor invocation (structs need to be trivial-copy POD for this cc-invoc to work.)
+    }
     subsystem->setPersistentDataStore(persistentPointer);
     subsystem->setInterface(this->interface);
     subsystem->onPersistentPointerSet();
@@ -77,6 +79,7 @@ inline void Instrument<numSubsystems>::process() {
 
 template<uint16_t numSubsystems>
 inline void Instrument<numSubsystems>::deep_sleep_start() {
+  this->memoryManager.confirmStructuresInitialized();
   esp_deep_sleep_start();
 }
 

@@ -9,6 +9,7 @@ union PersistentMemoryBlock {
   PersistentMemoryBlock() {};
   
   struct PersistentMemory {
+    bool needToInitializeStructures=true;
     uint8_t persistentMemoryStart=0; //MUST BE LAST in PersistentMemory struct.
   } persistentMemory;
   char padding[RTC_SRAM_SIZE];
@@ -21,6 +22,8 @@ class PersistentMemoryManager {
   uint32_t addPersistentBlock(uint32_t len);
   uint32_t getNextAvailableAddress();
   void setMemoryBlock(PersistentMemoryBlock* memoryBlock);
+  void confirmStructuresInitialized() {this->memoryBlock->persistentMemory.needToInitializeStructures=false;}
+  bool needToInitializeStructures() {return this->memoryBlock->persistentMemory.needToInitializeStructures;}
   PersistentMemoryBlock* getMemoryBlock();
   private:
   PersistentMemoryBlock* memoryBlock;
