@@ -10,38 +10,38 @@
 #include "Sleepable.h"
 
 struct InstrumentPersistentData {
-  uint64_t nextTime=0;
-  uint16_t subsystemID=0;
-  bool notDoneFlag=false;
+    uint64_t nextTime = 0;
+    uint16_t subsystemID = 0;
+    bool notDoneFlag = false;
 };
 
-template<uint16_t numSubsystems=0>
+template<uint16_t numSubsystems = 0>
 class Instrument {
-  public:
-  Instrument(PersistentMemoryBlock* memoryBlock, InfoInterface* interface, uRTCLib* rtc);
-  void process();
-  void initialize();
-  ConfigurationInterface* getConfigurationInterface() {return &configInterface;}
-  
-  private:
-  PersistentMemoryManager memoryManager;
-  uint16_t index=0;
-  SubsystemEntry* subsystems[numSubsystems];
-  InstrumentPersistentData* persistentData;
-  void getNextTimeToPersistentStruct();
-  void setSecondLevelAlarm(uint64_t time); //time is in milliseconds since epoch
-  void setAlarmMilliseconds(uint16_t ms);
-  void sleepSubsystems();
-  void wakeSubsystems();
-  void deep_sleep_start();
-  bool initialized=false;
-  ConfigurationInterface configInterface;
+public:
+    Instrument(PersistentMemoryBlock* memoryBlock, InfoInterface* interface, uRTCLib* rtc);
+    void process();
+    void initialize();
+    ConfigurationInterface* getConfigurationInterface() { return &configInterface; }
 
-  protected:
-  InfoInterface* interface;
-  uRTCLib* rtc;
-  virtual void addAllSubsystems()=0;
-  template<typename P, const String* reflectionData> void addSubsystem(SubsystemBase<P, reflectionData>* subsystem);
+private:
+    PersistentMemoryManager memoryManager;
+    uint16_t index = 0;
+    SubsystemEntry* subsystems[numSubsystems];
+    InstrumentPersistentData* persistentData;
+    void getNextTimeToPersistentStruct();
+    void setSecondLevelAlarm(uint64_t time); //time is in milliseconds since epoch
+    void setAlarmMilliseconds(uint16_t ms);
+    void sleepSubsystems();
+    void wakeSubsystems();
+    void deep_sleep_start();
+    bool initialized = false;
+    ConfigurationInterface configInterface;
+
+protected:
+    InfoInterface* interface;
+    uRTCLib* rtc;
+    virtual void addAllSubsystems() = 0;
+    template<typename P, const String* reflectionData> void addSubsystem(SubsystemBase<P, reflectionData>* subsystem);
 };
 
 

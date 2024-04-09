@@ -14,11 +14,11 @@ SerialInterface instrumentInterface((HardwareSerial*)&Serial, 115200, &rtc);
 
 ExampleInstrument m(&persistentMemoryBlock, &instrumentInterface, &rtc, 453456, 183274);
 void setup() {
-  URTCLIB_WIRE.begin();
-  instrumentInterface.begin();
-  m.initialize();
+    URTCLIB_WIRE.begin();
+    instrumentInterface.begin();
+    m.initialize();
 }
 
 void loop() {
-  m.getConfigurationInterface()->process();
+    m.getConfigurationInterface()->process();
 }
